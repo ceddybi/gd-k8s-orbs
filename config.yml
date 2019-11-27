@@ -1,0 +1,43 @@
+# This code is licensed from CircleCI to the user under the MIT license. See
+# https://circleci.com/orbs/registry/licensing for details.
+version: 2.1
+description: Google Kubernetes Engine (GKE) Orb
+
+# Orb Dependencies
+orbs:
+  gcloud: circleci/gcp-cli@1.0.6
+  gcr: circleci/gcp-gcr@0.0.2
+  k8s: circleci/kubernetes@0.1.0
+
+commands:
+  install:
+    description: "Install `gcloud` and `kubectl` if not already installed."
+    steps:
+      - gcloud/install
+      - k8s/install
+  init:
+    description: "Initialize the `gcloud` CLI."
+    steps:
+      - gcloud/initialize
+  rollout-image:
+    description: "Update a deployment's Docker image."
+    parameters:  
+      cluster:
+        description: "The Kubernetes cluster name."
+        type: string
+      zone:
+        description: "The Google cloud zone"
+        type: string          
+      deployment:
+        description: "The Kubernetes deployment name."
+        type: string
+      container:
+        description: "The Kubernetes container name."
+        type: string
+      image:
+        description: A name for your docker image
+        type: string
+    steps:
+      - run: |
+          gcloud container clusters get-credentials <<parameters.cluster>> --zone <<parameters.zone>>
+          kubectl set image deployment <<parameters.deployment>> <<parameters.container>>=<<parameters.image>>
